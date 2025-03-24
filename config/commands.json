@@ -1,0 +1,11 @@
+{
+  "menu": {
+    "enabled": true
+  },
+  "calculator": {
+    "enabled": true
+  },
+  "pix": {
+    "enabled": true
+  }
+}
