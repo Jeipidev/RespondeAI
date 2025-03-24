@@ -38,31 +38,35 @@ def write_local_sha(sha):
 
 
 def download_and_extract_zip():
-    print("🔄 Baixando nova versão do GitHub...")
-    r = requests.get(ZIP_URL, stream=True)
-    zip_path = "update.zip"
+    try:
+        print("🔄 Baixando nova versão do GitHub...")
+        r = requests.get(ZIP_URL, stream=True)
+        r.raise_for_status()  # Levanta um erro se o status não for 200
 
-    with open(zip_path, 'wb') as f:
-        shutil.copyfileobj(r.raw, f)
+        zip_path = "update.zip"
+        with open(zip_path, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
 
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall("update_temp")
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall("update_temp")
 
-    os.remove(zip_path)
+        os.remove(zip_path)
 
-    # Copia arquivos extraídos por cima do atual
-    src_folder = os.path.join("update_temp", os.listdir("update_temp")[0])
-    for root, dirs, files in os.walk(src_folder):
-        rel_path = os.path.relpath(root, src_folder)
-        dest_path = os.path.join(".", rel_path)
+        # Copia arquivos extraídos por cima do atual
+        src_folder = os.path.join("update_temp", os.listdir("update_temp")[0])
+        for root, dirs, files in os.walk(src_folder):
+            rel_path = os.path.relpath(root, src_folder)
+            dest_path = os.path.join(".", rel_path)
+            os.makedirs(dest_path, exist_ok=True)
+            for file in files:
+                shutil.copy2(os.path.join(root, file), os.path.join(dest_path, file))
 
-        os.makedirs(dest_path, exist_ok=True)
-        for file in files:
-            shutil.copy2(os.path.join(root, file), os.path.join(dest_path, file))
-
-    shutil.rmtree("update_temp")
-    print("✅ Atualização aplicada!")
-
+        shutil.rmtree("update_temp")
+        print("✅ Atualização aplicada!")
+    except Exception as e:
+        print("Erro durante o processo de atualização:", e)
 
 def check_and_update():
     latest_sha = get_latest_sha()
