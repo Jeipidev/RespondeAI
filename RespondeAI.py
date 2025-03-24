@@ -14,7 +14,7 @@ from ttkbootstrap.constants import *
 from tkinter import messagebox, Canvas
 
 # ========== AUTO ATUALIZADOR VIA GITHUB ==========
-GITHUB_REPO = "Jeipidev/RespodeAI"  
+GITHUB_REPO = "Jeipidev/RespondeAI"  
 LOCAL_SHA_FILE = "version.txt"
 ZIP_URL = f"https://github.com/{GITHUB_REPO}/archive/refs/heads/main.zip"
 COMMIT_URL = f"https://api.github.com/repos/{GITHUB_REPO}/commits/main"
