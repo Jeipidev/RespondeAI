@@ -1,1 +1,7 @@
+__pycache__/
+*.pyc
+*.exe
+dist/
+build/
+.env
 chrome-user-data/
