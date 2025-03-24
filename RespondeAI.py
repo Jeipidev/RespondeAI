@@ -41,32 +41,56 @@ def download_and_extract_zip():
     try:
         print("🔄 Baixando nova versão do GitHub...")
         r = requests.get(ZIP_URL, stream=True)
-        r.raise_for_status()  # Levanta um erro se o status não for 200
+        r.raise_for_status()  # Garante que o download foi bem-sucedido
 
         zip_path = "update.zip"
         with open(zip_path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
+        print("✅ Download concluído.")
 
+        # Extrai o zip para um diretório temporário
+        extract_dir = "update_temp"
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall("update_temp")
+            zip_ref.extractall(extract_dir)
+        print("✅ Extração concluída.")
 
+        # Remove o arquivo zip baixado
         os.remove(zip_path)
 
-        # Copia arquivos extraídos por cima do atual
-        src_folder = os.path.join("update_temp", os.listdir("update_temp")[0])
+        # Verifica a pasta extraída (normalmente com nome "RespodeAI-main" ou similar)
+        extracted_dirs = os.listdir(extract_dir)
+        if not extracted_dirs:
+            print("Erro: Nenhum arquivo foi extraído.")
+            return
+        src_folder = os.path.join(extract_dir, extracted_dirs[0])
+        print(f"Fonte extraída: {src_folder}")
+
+        # Define o diretório atual da aplicação (local onde o script está sendo executado)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        print(f"Diretório atual da aplicação: {current_dir}")
+
+        # Copia recursivamente os arquivos da pasta extraída para o diretório atual
         for root, dirs, files in os.walk(src_folder):
             rel_path = os.path.relpath(root, src_folder)
-            dest_path = os.path.join(".", rel_path)
+            dest_path = os.path.join(current_dir, rel_path)
             os.makedirs(dest_path, exist_ok=True)
             for file in files:
-                shutil.copy2(os.path.join(root, file), os.path.join(dest_path, file))
+                source_file = os.path.join(root, file)
+                dest_file = os.path.join(dest_path, file)
+                try:
+                    shutil.copy2(source_file, dest_file)
+                    print(f"Arquivo '{source_file}' substituído com sucesso em '{dest_file}'.")
+                except Exception as copy_err:
+                    print(f"Erro ao copiar '{source_file}' para '{dest_file}': {copy_err}")
 
-        shutil.rmtree("update_temp")
+        # Remove o diretório temporário de extração
+        shutil.rmtree(extract_dir)
         print("✅ Atualização aplicada!")
     except Exception as e:
         print("Erro durante o processo de atualização:", e)
+
 
 def check_and_update():
     latest_sha = get_latest_sha()
