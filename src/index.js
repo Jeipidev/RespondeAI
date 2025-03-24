@@ -131,21 +131,15 @@ const configPath = path.join(__dirname, '..', 'config', 'commands.json');
         }
         const msg = input.innerText.trim();
         // Se a mensagem iniciar com '/', assumimos que é um comando avançado
-        if (msg.startsWith('/')) {
-          console.log('🚀 Executando window.handleTabCommand() para comando avançado');
-          if (typeof window.handleTabCommand === 'function') {
-            window.handleTabCommand();
-          } else {
-            console.log('⚠️ Comando avançado não encontrado');
-          }
-        } else {
+        if (typeof window.handleSimpleCommand === 'function') {
           console.log('🚀 Executando window.handleSimpleCommand() para comando simples');
-          if (typeof window.handleSimpleCommand === 'function') {
-            window.handleSimpleCommand();
-          } else {
-            console.log('⚠️ Comando simples não encontrado');
-          }
-        }
+          window.handleSimpleCommand();
+        } else if (typeof window.handleTabCommand === 'function') {
+          console.log('🚀 Executando window.handleTabCommand() para comando avançado');
+          window.handleTabCommand();
+        } else {
+          console.log('⚠️ Nenhum comando encontrado para TAB');
+        }        
       }
     });
   });
